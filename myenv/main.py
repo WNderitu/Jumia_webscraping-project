@@ -3,14 +3,15 @@ from bs4 import BeautifulSoup
 import csv
 import re
 
-result = requests.get('https://www.jumia.co.ke/')
-# print(result.status_code)
+# error handling for HTTP requests in case the website is not accessible when using get. checks request errors. 
+response = requests.get('https://www.jumia.co.ke/')
+if response.status_code == 200:
+    src = response.content
+    print(src)
+else:
+    print('Error accessing the website', response.status_code)
 
-src = result.content
-# print(src)
-
-soup = BeautifulSoup(result.content, 'html.parser')
-
+soup = BeautifulSoup(response.content, 'html.parser')
 
 top_selling_items = soup.find_all('a', class_='core')
 
@@ -25,15 +26,15 @@ def check_if_element_is_available(e):
 data = []
 for top_selling_item in top_selling_items:
     product_name = check_if_element_is_available(top_selling_item.find('div',class_='name'))
-    price_after_discnt = check_if_element_is_available(top_selling_item.find('div',class_='prc'))
-    percent_discnt = check_if_element_is_available(top_selling_item.find('div',class_='bdg _dsct'))
-    data.append([product_name, price_after_discnt,percent_discnt])
+    discounted_price = check_if_element_is_available(top_selling_item.find('div',class_='prc'))
+    percent_discount = check_if_element_is_available(top_selling_item.find('div',class_='bdg _dsct'))
+    data.append([product_name, discounted_price, percent_discount])
 
 print(data)
 # #  # to save data in csv format
 with open('top_selling_items.csv', 'w') as file:
     writer = csv.writer(file)
-    writer.writerow(['product_name','price_after_discnt','percent_discnt'])
+    writer.writerow(['product_name','discounted_price','percent_discount'])
     writer.writerows(data)
         
-
+        
